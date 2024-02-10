@@ -1,0 +1,49 @@
+{
+  "name": "kiosktsapplib",
+  "description": "Library for Kiosk Typescript Apps",
+  "private": true,
+  "version": "0.1",
+  "type": "module",
+  "main": "kiosktsapplib.ts",
+  "exports": {
+    ".": "./kiosktsapplib.ts"
+  },
+  "types": "types/kiosktsapplib.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "keywords": [],
+  "author": "Lutz Klein",
+  "license": "AGPL-3.0",
+  "prettier": {
+    "semi": true,
+    "trailingComma": "all",
+    "singleQuote": false,
+    "printWidth": 120,
+    "tabWidth": 4
+  },
+  "scripts": {
+    "dev": "vite --host",
+    "test": "vitest",
+    "build": "tsc && vite build --emptyOutDir"
+  },
+  "dependencies": {
+    "@lit-labs/context": "^0.5.1",
+    "lit": "^3.1.2",
+    "luxon": "^3.4.4",
+    "nanoid": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.1",
+    "@types/luxon": "^3.3.3",
+    "prettier": "^2.8.4",
+    "rollup-plugin-copy": "^3.4.0",
+    "sass": "^1.58.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.3",
+    "vite": "^4.1.0",
+    "vite-plugin-html": "^3.2.0",
+    "vitest": "^0.34.5"
+  }
+}
