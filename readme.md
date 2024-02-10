@@ -1,4 +1,4 @@
-# 💼 Kiosk TypeScript Applicaton Library (kiosktsapplib)
+# 📦 Kiosk TypeScript Applicaton Library (kiosktsapplib)
  
 This is a bunch of general classes, files and functions shared by all 
 front-end Kiosk Apps.  
