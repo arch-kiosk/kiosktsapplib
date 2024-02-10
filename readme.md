@@ -1,12 +1,11 @@
-# 💼 The Office
+# 💼 Kiosk TypeScript Applicaton Library (kiosktsapplib)
  
-## 🤸🏿👽🕵️ This repository is for people 🤸🤖🎅
+This is a bunch of general classes, files and functions shared by all 
+front-end Kiosk Apps.  
 
-No matter for which field-project or which part of the software, it is here and only here in this repository where we all collaborate, report bugs and ideas, discuss ...
-
-## typical workplaces
-- 🧪 [testers work here](https://github.com/arch-kiosk/arch-kiosk-office/projects/25)
-- 🪲 [please file requests and bug tickets under Issues](https://github.com/arch-kiosk/arch-kiosk-office/issues)
+## how to use this library
+usually linked in projects with ```npm link `{path and filename} --save```  
+can be opened in and of itself (to enhance it or run tests). 
 
 ## other places
 
