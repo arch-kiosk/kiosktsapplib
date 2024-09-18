@@ -1,5 +1,5 @@
 // import { html, css, LitElement } from '/node_modules/lit';
-import { html, LitElement, PropertyValues, TemplateResult } from "lit";
+import { html, LitElement, TemplateResult } from "lit";
 import { API_STATE_ERROR, API_STATE_READY } from "./kioskapi";
 import { state } from "lit/decorators.js";
 

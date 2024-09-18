@@ -7,7 +7,12 @@ export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, "env");
     return {
         plugins: [
-            createHtmlPlugin(),
+            createHtmlPlugin({
+                inject: {
+                    ...env,
+                },
+
+            }),
             // copy({
             //   targets: [ { src: '../../kioskfilemakerworkstationplugin/static/kioskfilemakerworkstation.css',
             //     dest:'./kioskfilemakerworkstation/static'
@@ -42,11 +47,6 @@ export default defineConfig(({ command, mode }) => {
                 allow: [searchForWorkspaceRoot(process.cwd()), "../server/kiosk/kiosk/static/scripts/kioskapplib"],
             },
         },
-        publicDir: "/static",
-        html: {
-            injectData: {
-                ...env,
-            },
-        },
+        publicDir: "/static"
     };
 });

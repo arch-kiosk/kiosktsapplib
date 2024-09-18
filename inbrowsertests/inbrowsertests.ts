@@ -8,6 +8,10 @@ let testFunctions: Array<Function> = []
 // @ts-ignore
 window.runInBrowserTests = function(api: KioskApi) {
     const body:HTMLElement = document.getElementsByTagName('body')[0] as HTMLElement
+    if (!api) {
+        body.innerHTML = "<div>no Kiosk API</div>"
+        return
+    }
 
     function startNextTest(i: number) {
         if (i >= testFunctions.length) return
@@ -31,8 +35,10 @@ window.runInBrowserTests = function(api: KioskApi) {
 testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
         node.innerHTML = "testing KioskTimeZones.fetchFavouriteTimeZones ...";
         // const kioskApi = await getKioskApiforTest()
+        if (!api) throw "no Kiosk API"
         const kioskTimeZones = new KioskTimeZones(api)
         const jsonTimeZones = await kioskTimeZones.fetchFavouriteTimeZones()
+        if (!jsonTimeZones) throw "jsonTimeZones is null: fetching favourite time zones failed"
         if (jsonTimeZones.length < 30) throw "jsonTimeZones < 30"
     })
 
@@ -41,6 +47,7 @@ testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
     const kioskTimeZones = new KioskTimeZones(api)
     // @ts-ignore
     const favouriteKioskTimeZones = await kioskTimeZones.refreshFavourites()
+    if (!favouriteKioskTimeZones) throw "favouriteKioskTimeZones is null: refreshing favourite time zones failed"
     if (favouriteKioskTimeZones.length < 30) throw "favouriteKioskTimeZones < 30"
     // @ts-ignore
     if (!kioskTimeZones.hasRefreshedFavourites) throw("favouriteKioskTimeZones not refreshed")
@@ -65,3 +72,15 @@ testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
     if (allKioskTimeZones.filter(tz => tz.deprecated == 1).length < 10)  throw "deprecated Kiosk Time Zones < 30 after getAllTimeZones()"
 })
 
+testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
+    node.innerHTML = "testing KioskTimeZones.getTimeZoneByIndex ...";
+    const kioskTimeZones = new KioskTimeZones(api)
+    // @ts-ignore
+    let kioskTimeZone = await kioskTimeZones.getTimeZoneByIndex(1820474)
+    if (kioskTimeZone == null) throw "kioskTimeZone 1820474 does not exist"
+    if (kioskTimeZone.tz_IANA != "Asia/Calcutta") throw "kioskTimeZone is not Asia/Calcutta"
+    kioskTimeZone = await kioskTimeZones.getTimeZoneByIndex(0)
+    if (kioskTimeZone != null) throw "kioskTimeZone 0 should not exist"
+    kioskTimeZone = await kioskTimeZones.getTimeZoneByIndex(-1)
+    if (kioskTimeZone != null) throw "kioskTimeZone -1 should not exist"
+})

@@ -3,9 +3,9 @@ export type AnyDict = {
 }
 
 export class Constant {
-    path : string
-    key: string
-    value: string
+    path : string = ""
+    key: string = ""
+    value: string = ""
 }
 
 export type ApiResultContextsFull={

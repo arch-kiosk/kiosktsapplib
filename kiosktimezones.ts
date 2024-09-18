@@ -1,8 +1,5 @@
 import { FetchException, KioskApi } from "./kioskapi";
 import Dexie, { EntityTable } from "dexie";
-import { ApiResultContextsFull } from "./generaltypes";
-import { handleCommonFetchErrors } from "./applib";
-import { FALSE } from "sass";
 
 export interface TimeZone {
     id: number,
@@ -26,8 +23,8 @@ type KioskTimeZoneDb = Dexie & {
 }
 
 export class KioskTimeZones {
-    private apiContext: KioskApi = undefined
-    private db: KioskTimeZoneDb = undefined
+    private apiContext: KioskApi | undefined = undefined
+    private db: KioskTimeZoneDb | undefined = undefined
     private hasRefreshedFavourites: boolean = false
     private hasRefreshedAll: boolean = false
 
@@ -45,23 +42,32 @@ export class KioskTimeZones {
     }
 
     public async getFavouriteTimeZones(includeDeprecated = false, refreshAfterwards=false): Promise<Array<TimeZone>> {
-        const c = await this.db.kioskTimeZones.count()
-        let favourites: Array<TimeZone>
-        if (c == 0) {
-            favourites = await this.refreshFavourites()
-        }
-        favourites = await this.db.kioskTimeZones.where({ "deprecated": 0, "favourite":1 }).toArray()
-        if (refreshAfterwards)
-            this.refreshFavourites().finally(() => {console.log("refreshed favourites")})
-
-        return(favourites)
+        if (this.db) {
+            const c = await this.db.kioskTimeZones.count()
+            let favourites: Array<TimeZone>
+            if (c == 0) {
+                await this.refreshFavourites()
+            }
+            if (!includeDeprecated) {
+                favourites = await this.db.kioskTimeZones.where({ "deprecated": 0, "favourite": 1 }).toArray()
+            } else {
+                favourites = await this.db.kioskTimeZones.where({ "favourite": 1 }).toArray()
+            }
+            if (refreshAfterwards) {
+                this.refreshFavourites().finally(() => {
+                    console.log("refreshed favourites")
+                })
+            }
+            return (favourites)
+        } else return []
     }
 
     private async refreshFavourites () {
+        if (!this.db) return []
         if (!this.hasRefreshedFavourites) {
             const json = await this.fetchFavouriteTimeZones()
-            if (json.length > 0) {
-                const cDeleted = await this.db.kioskTimeZones.where("favourite").equals(1).delete()
+            if (json && json.length > 0) {
+                let cDeleted = await this.db?.kioskTimeZones.where("favourite").equals(1).delete()
                 console.log(`Deleted ${cDeleted} favourite time zones`)
                 const timeZones: Array<TimeZone> = json.map((tz:ApiResultKioskTimeZone) => {
                     return {
@@ -71,7 +77,8 @@ export class KioskTimeZones {
                         version: tz.version,
                         favourite: 1 } as TimeZone
                 }) as Array<TimeZone>
-                await this.db.kioskTimeZones.bulkAdd(timeZones)
+                let c = await this.db?.kioskTimeZones.bulkAdd(timeZones)
+                console.log(`Added ${c} new favourite time zones`)
                 this.hasRefreshedFavourites = true
                 return timeZones
             }
@@ -80,7 +87,7 @@ export class KioskTimeZones {
     }
 
     async fetchFavouriteTimeZones() {
-        return await this.apiContext.fetchFromApi(
+        return await this.apiContext?.fetchFromApi(
             "",
             "favouritetimezones",
             {
@@ -101,7 +108,7 @@ export class KioskTimeZones {
         const urlSearchParams = new URLSearchParams();
         urlSearchParams.append("include_deprecated", "true");
         if (newerThan > 0) urlSearchParams.append("newer_than", `${newerThan}`);
-        return await this.apiContext.fetchFromApi(
+        return await this.apiContext?.fetchFromApi(
             "",
             "timezones",
             {
@@ -121,20 +128,25 @@ export class KioskTimeZones {
     }
 
     async getAllTimeZones(deprecated = false, forceReload = false) {
-        let allTimeZones = await this.refreshAllTimeZones(forceReload);
-        if (allTimeZones.length == 0) {
-            console.log("fetching time zones entirely from database")
-           allTimeZones = await this.db.kioskTimeZones.toArray()
-        }
-        return allTimeZones.filter(tz => tz.deprecated == 0 || deprecated)
+        await this.refreshAllTimeZones(forceReload);
+        let allTimeZones = await this.db?.kioskTimeZones.toArray()
+        return allTimeZones?.filter(tz => tz.deprecated == 0 || deprecated)
+    }
+
+    async getTimeZoneByIndex(tz_index: number, forceReload = false) {
+        if (!this.db) return
+        await this.refreshAllTimeZones(forceReload);
+        let results = (await this.db.kioskTimeZones.where("id").equals(tz_index).toArray())
+        return results.length>0?results[0]:null
     }
 
     private async refreshAllTimeZones(forceReload: boolean) {
         let allTimeZones: Array<TimeZone> = []
+        if (!this.db) return
         if (forceReload || !this.hasRefreshedAll) {
             // await this.db.kioskTimeZones.where("favourite").equals(0).count()
             let maxVersion = 0
-            const favourites = (await this.getFavouriteTimeZones()).filter(t => t.favourite).map(t => t.id);
+            const favourites = (await this.getFavouriteTimeZones()).filter(t => t.favourite == 1).map(t => t.id);
 
             if (!forceReload) {
                 try {
@@ -145,8 +157,9 @@ export class KioskTimeZones {
 
             const json = await this.fetchAllTimeZones(maxVersion);
 
-            if (json.length > 0) {
-                this.db.kioskTimeZones.where("version").aboveOrEqual(maxVersion).delete()
+            if (json && json.length > 0) {
+                let c = await this.db.kioskTimeZones.where("version").above(maxVersion).delete()
+                console.log(`delete ${c} time zones above version ${maxVersion}`)
                 allTimeZones = json.map((tz: ApiResultKioskTimeZone) => {
                     return {
                         id: tz.id, tz_IANA: tz.tz_IANA,
@@ -156,10 +169,10 @@ export class KioskTimeZones {
                         favourite: favourites.includes(tz.id) ? 1 : 0,
                     } as TimeZone;
                 }) as Array<TimeZone>;
-                await this.db.kioskTimeZones.bulkAdd(allTimeZones)
+                c = await this.db.kioskTimeZones.bulkAdd(allTimeZones)
+                console.log(`added ${c} new time zones `)
                 this.hasRefreshedAll = true
             }
         }
-        return allTimeZones;
     }
 }

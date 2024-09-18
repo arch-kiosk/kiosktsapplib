@@ -81,7 +81,7 @@ export function name2RecordType(recordTypeNames: {[key:string]: string}, name: s
 
 export function handleCommonFetchErrors(handlerInstance: LitElement,
                                         e: FetchException, messagePrefix="",
-                                        onUnhandledError: CallableFunction=null) {
+                                        onUnhandledError: CallableFunction|null=null) {
     if (messagePrefix) messagePrefix += ": "
     if (e.response) {
         if (e.response.status == 403 || e.response.status == 401) {
@@ -145,13 +145,15 @@ export function compareISODateTime(d1: string|undefined, d2: string|undefined): 
     if (d1 && !d2) return (-1)
     if (!d1 && !d2) return (0)
 
-    const ld1 = DateTime.fromISO(d1)
-    const ld2 = DateTime.fromISO(d2)
+    if (d1 && d2) {
+        const ld1 = DateTime.fromISO(d1)
+        const ld2 = DateTime.fromISO(d2)
 
-    if (ld1 < ld2)
-        return -1
-    if (ld1 > ld2)
-        return 1
+        if (ld1 < ld2)
+            return -1
+        if (ld1 > ld2)
+            return 1
+    }
 
     return 0
 
@@ -159,7 +161,7 @@ export function compareISODateTime(d1: string|undefined, d2: string|undefined): 
 
 }
 
-export function FMDictToDict(FMDict: string): AnyDict {
+export function FMDictToDict(FMDict: string): AnyDict | undefined {
     const lines = FMDict.split("\r")
     const rc: {[key: string]: string} = {}
     let key, value: string

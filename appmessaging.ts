@@ -17,6 +17,7 @@ class MESSAGE_DETAIL {
     }
 }
 
+// @ts-ignore
 let MESSAGE_ID_DETAILS: { [key: string]: MESSAGE_DETAIL } = {
     "MSG_LOGGED_OUT": {
         "severity": 10
