@@ -7,13 +7,16 @@
     "target": "es2020",
 //    "jsx": "react",
     "allowJs": true,
-    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "types": ["vite/client"],
 //    "typeRoots": [
 //      "./node_modules/@types",
 //      "./types/common"
 //    ]
   },
-  "exclude": ["node_modules", "old"]
+  "exclude": ["node_modules", "old", "../server/kiosk/kiosk/static/scripts"]
 }

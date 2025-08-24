@@ -4,14 +4,10 @@ import {
     API_STATE_ERROR,
     API_STATE_INITIALIZING,
     API_STATE_READY,
-    API_STATE_UNINITIALZED,
 } from "./kioskapi";
 
 export class DevKioskApi extends KioskApi {
-    token = "";
-    lastErrorMessage = "";
     kioskRoutes: { [key: string]: string } = {}
-    status = API_STATE_UNINITIALZED;
 
     getKioskRoute(routeName: string) {
         if (!this.kioskRoutes) {
@@ -33,8 +29,8 @@ export class DevKioskApi extends KioskApi {
 
     getApiUrl(apiAddress = "") {
 
-        // @ts-ignore
-        let route = import.meta.env.VITE_DEV_API_URL;
+        console.log("dekioskapi", this)
+        let route = this.apiURL;
         if (apiAddress) {
             return `${route}${this.apiRoot}v1/${apiAddress}`;
         } else {
@@ -44,10 +40,8 @@ export class DevKioskApi extends KioskApi {
 
     getHeaders(mimetype:string)  {
         let headers = super.getHeaders(mimetype)
-        // @ts-ignore
-        headers.append("webapp-user-id",import.meta.env.VITE_DEV_API_USER);
-        // @ts-ignore
-        headers.append("webapp-user-pwd",import.meta.env.VITE_DEV_API_PWD);
+        headers.append("webapp-user-id", this.apiUser);
+        headers.append("webapp-user-pwd",this.apiPwd);
         return headers
     }
 
@@ -55,11 +49,9 @@ export class DevKioskApi extends KioskApi {
     async initApi() {
         this.status = API_STATE_INITIALIZING;
         let headers = new Headers()
-        console.log("meta:", import.meta)
         headers.append("Content-Type", "application/json");
         headers.append("Accept", "application/json");
-        // @ts-ignore
-        headers.append("Origin", import.meta.env.VITE_DEV_API_URL);
+        headers.append("Origin", this.apiURL);
 
         let address = this.getApiUrl("login");
         let response;
@@ -67,10 +59,8 @@ export class DevKioskApi extends KioskApi {
             response = await fetch(address, {
                 headers: headers,
                 body: JSON.stringify({
-                    // @ts-ignore
-                    userid: import.meta.env.VITE_DEV_API_USER,
-                    // @ts-ignore
-                    password: import.meta.env.VITE_DEV_API_PWD,
+                    userid: this.apiUser,
+                    password: this.apiPwd
                 }),
                 method: "POST",
             });

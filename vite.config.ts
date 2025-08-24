@@ -1,12 +1,17 @@
 import { defineConfig, searchForWorkspaceRoot, loadEnv } from "vite";
 import { createHtmlPlugin } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
+import dts from 'vite-plugin-dts'
+import { resolve } from 'path'
 
 // noinspection JSUnusedGlobalSymbols
 export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, "env");
     return {
         plugins: [
+            dts({
+                rollupTypes: true,
+            }),
             createHtmlPlugin({
                 inject: {
                     ...env,
@@ -27,18 +32,21 @@ export default defineConfig(({ command, mode }) => {
             command == "build"
                 ? {
                       //No console.logs in the distribution
-                      drop: ["console", "debugger"],
+                      // drop: ["console", "debugger"],
                   }
                 : {},
         build: {
-            outDir: "../static/app",
+            outDir: "./dist",
+            emptyOutDir: true,
+            minify: true,
             lib: {
-                entry: "src/app.ts",
+                entry: "./kiosktsapplib.ts",
                 formats: ["es"],
             },
-            // rollupOptions: {
-            //   external: /^lit/,
-            // },
+            rollupOptions: {
+                // external: [/^dexie/]
+                external: [/node_modules/,]
+            },
         },
         server: {
             fs: {

@@ -10,10 +10,11 @@ export class KioskApiError extends Error {
     }
 }
 
-export class FetchException extends Error{
-    msg: string
-    response: any
-    constructor(msg: string, response:any = null) {
+export class FetchException extends Error {
+    msg: string;
+    response: any;
+
+    constructor(msg: string, response: any = null) {
         super();
         this.msg = msg;
         this.response = response;
@@ -21,22 +22,31 @@ export class FetchException extends Error{
 }
 
 interface FetchParams extends RequestInit {
-    caller?: string
+    caller?: string;
 }
 
 //abstract
 export class KioskApi {
     token = "";
-    apiRoot = "/";
+    protected apiRoot = "/";
+    protected apiUser: string
+    protected apiURL: string
+    protected apiPwd: string
     lastErrorMessage = "";
 
     status = API_STATE_UNINITIALZED;
 
-    constructor(apiRoot = "/") {
+    constructor(apiRoot = "/",
+                apiURL: string,
+                apiUser: string,
+                apiPwd: string) {
         if (!apiRoot.startsWith("/")) apiRoot = "/" + apiRoot;
         if (!apiRoot.endsWith("/")) apiRoot = apiRoot + "/";
         this.apiRoot = apiRoot;
-        console.log("The apiRoot is " + this.apiRoot);
+        console.log("The kioskApi apiRoot is " + this.apiRoot);
+        this.apiURL = apiURL
+        this.apiUser = apiUser
+        this.apiPwd = apiPwd
     }
 
     //abstract method
@@ -44,7 +54,7 @@ export class KioskApi {
         throw `KioskApi.getKioskRoute (${route_name})is not implemented`;
     }
 
-    getApiUrl(apiAddress = ""):string {
+    getApiUrl(apiAddress = ""): string {
         //abstract method
         throw `KioskApi.getApiUrl (${apiAddress})is abstract and must not be called`;
     }
@@ -54,7 +64,7 @@ export class KioskApi {
         headers.append("Content-Type", mimetype);
         headers.append("Accept", mimetype);
         headers.append("Authorization", `Bearer ${this.token}`);
-        return headers
+        return headers;
     }
 
     async initApi() {
@@ -72,7 +82,7 @@ export class KioskApi {
      * @param mimetype
      */
     async fetchFromApi(
-        apiRoot:string,
+        apiRoot: string,
         apiMethod: string,
         fetchParams: FetchParams,
         apiVersion = "v1",
@@ -82,14 +92,14 @@ export class KioskApi {
         if (!this.token) {
             throw new KioskApiError("No api-token when calling fetchFromApi");
         }
-        let headers = this.getHeaders(mimetype)
-        let apiURL = this.getApiUrl()
-        console.log("apiURL is" + apiURL)
+        let headers = this.getHeaders(mimetype);
+        let apiURL = this.getApiUrl();
+        console.log("apiURL is" + apiURL);
 
         if (!apiURL.endsWith("/")) {
-            apiURL += '/'
+            apiURL += "/";
         }
-        let address = `${apiURL}${apiRoot?apiRoot + '/':''}${apiVersion}/${apiMethod}`;
+        let address = `${apiURL}${apiRoot ? apiRoot + "/" : ""}${apiVersion}/${apiMethod}`;
 
         if ("caller" in fetchParams)
             console.log(`${fetchParams.caller} fetching from ${address}`);
@@ -112,11 +122,52 @@ export class KioskApi {
         } else {
             const json_response = await response.json();
             console.log(`caught ${response.status} in fetchFromApi`);
-            if (json_response && 'result_msg' in json_response) {
+            if (json_response && "result_msg" in json_response) {
                 throw new FetchException(json_response.result_msg, response);
             } else {
                 throw new FetchException(response.statusText, response);
             }
+        }
+    }
+
+    /**
+     * returns the fetch address and the fetch parameters to be used with fetch.
+     * the result is an object consisting of an attribute url - the address - and init - the
+     * init parameter for fetch. init["headers"] has the headers for the fetch.
+     * @param apiRoot
+     * @param apiMethod
+     * @param fetchParams
+     * @param apiVersion
+     * @param urlSearchParams
+     * @param mimetype
+     */
+    getFetchURL(
+        apiRoot: string,
+        apiMethod: string,
+        fetchParams: FetchParams,
+        apiVersion = "v1",
+        urlSearchParams: URLSearchParams | null = null,
+        mimetype = "application/json",
+    ) {
+        if (!this.token) {
+            throw new KioskApiError("No api-token when calling getFetchURL ");
+        }
+        let headers = this.getHeaders(mimetype);
+        let apiURL = this.getApiUrl();
+
+        if (!apiURL.endsWith("/")) {
+            apiURL += "/";
+        }
+        let address = `${apiURL}${apiRoot ? apiRoot + "/" : ""}${apiVersion}/${apiMethod}`;
+
+        if (urlSearchParams) {
+            address += "?" + new URLSearchParams(urlSearchParams);
+        }
+        let init = { ...fetchParams };
+        init["headers"] = headers;
+        return {
+            url: address,
+            init: init
         }
     }
 
@@ -130,7 +181,7 @@ export class KioskApi {
      * @param mimetype
      */
     async fetchBlobFromApi(
-        apiRoot:string,
+        apiRoot: string,
         apiMethod: string,
         fetchParams: FetchParams,
         apiVersion = "v1",
@@ -140,14 +191,14 @@ export class KioskApi {
         if (!this.token) {
             throw new KioskApiError("No api-token when calling fetchBlobFromApi");
         }
-        let headers = this.getHeaders(mimetype)
-        let apiURL = this.getApiUrl()
-        console.log("apiURL is" + apiURL)
+        let headers = this.getHeaders(mimetype);
+        let apiURL = this.getApiUrl();
+        console.log("apiURL is" + apiURL);
 
         if (!apiURL.endsWith("/")) {
-            apiURL += '/'
+            apiURL += "/";
         }
-        let address = `${apiURL}${apiRoot?apiRoot + '/':''}${apiVersion}/${apiMethod}`;
+        let address = `${apiURL}${apiRoot ? apiRoot + "/" : ""}${apiVersion}/${apiMethod}`;
 
         if ("caller" in fetchParams)
             console.log(`${fetchParams.caller} fetching from ${address}`);
@@ -170,7 +221,7 @@ export class KioskApi {
         } else {
             const json_response = await response.json();
             console.log(`caught ${response.status} in fetchBlobFromApi`);
-            if (json_response && 'result_msg' in json_response) {
+            if (json_response && "result_msg" in json_response) {
                 throw new FetchException(json_response.result_msg, response);
             } else {
                 throw new FetchException(response.statusText, response);

@@ -27,6 +27,7 @@ export class KioskTimeZones {
     private db: KioskTimeZoneDb | undefined = undefined
     private hasRefreshedFavourites: boolean = false
     private hasRefreshedAll: boolean = false
+    private localCache: Map<number, TimeZone> = new Map()
 
     constructor(kioskApi: KioskApi) {
         this.apiContext = kioskApi
@@ -39,6 +40,10 @@ export class KioskTimeZones {
             kioskTimeZones: '&id, tz_long, tz_IANA, deprecated, version, favourite'
         })
         return db
+    }
+
+    public getLocalCache() {
+        return this.localCache
     }
 
     public async getFavouriteTimeZones(includeDeprecated = false, refreshAfterwards=false): Promise<Array<TimeZone>> {
@@ -133,11 +138,50 @@ export class KioskTimeZones {
         return allTimeZones?.filter(tz => tz.deprecated == 0 || deprecated)
     }
 
-    async getTimeZoneByIndex(tz_index: number, forceReload = false) {
+    async getTimeZoneByIndex(tzIndex: number, forceReload = false) {
         if (!this.db) return
         await this.refreshAllTimeZones(forceReload);
-        let results = (await this.db.kioskTimeZones.where("id").equals(tz_index).toArray())
-        return results.length>0?results[0]:null
+        let results = (await this.db.kioskTimeZones.where("id").equals(tzIndex).toArray())
+        return results.length>0?results[0]:undefined
+    }
+
+    /**
+     * Asynchronously caches the time zone information locally based on the provided timezone index.
+     * Locally cached time zone information can be retrieved synchronously using getTimeZoneInfoFromLocalCache
+     * @param tzIndex a Kiosk Time Zone Index
+     * @param tryRefresh Flag indicating whether to refresh the timezone information if not found in the cache.
+     * @returns A Promise that resolves to the cached TimeZone object if found, otherwise undefined.
+     */
+    async cacheLocally(tzIndex: number | undefined | string, tryRefresh = false): Promise<undefined | TimeZone> {
+        if (!this.db) return undefined
+        if (typeof tzIndex !== "number") return undefined
+
+        let tzInfo: TimeZone | undefined = this.localCache.get(tzIndex)
+        if (tzInfo) return tzInfo
+
+        tzInfo = await this.getTimeZoneByIndex(tzIndex)
+        if (!tzInfo) {
+            if (!tryRefresh) return undefined
+            await this.refreshAllTimeZones(false);
+            tzInfo = await this.getTimeZoneByIndex(tzIndex)
+        }
+        if (tzInfo) {
+            console.log("Cached TimeZone", tzInfo)
+            this.localCache.set(tzIndex, tzInfo)
+        }
+        return this.localCache.get(tzIndex)
+    }
+
+    /**
+     * Retrieves timezone information from the local cache based on the provided timezone index.
+     * Unlike other methods this is synchronous.
+     * @param tzIndex - The index of the timezone to retrieve information for.
+     * @returns a TimeZone instance if found in the local cache, otherwise undefined.
+     */
+    public getTimeZoneInfoFromLocalCache(tzIndex: number | undefined | string): undefined | TimeZone {
+        if (typeof tzIndex === "string") tzIndex = parseInt(tzIndex)
+        if (!tzIndex) return
+        return this.localCache.get(tzIndex)
     }
 
     private async refreshAllTimeZones(forceReload: boolean) {
@@ -171,8 +215,8 @@ export class KioskTimeZones {
                 }) as Array<TimeZone>;
                 c = await this.db.kioskTimeZones.bulkAdd(allTimeZones)
                 console.log(`added ${c} new time zones `)
-                this.hasRefreshedAll = true
             }
+            this.hasRefreshedAll = true
         }
     }
 }

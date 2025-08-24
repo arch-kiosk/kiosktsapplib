@@ -52,7 +52,7 @@ export abstract class KioskApp extends LitElement {
 
     abstract apiRender(): TemplateResult;
 
-    render() {
+    render():TemplateResult {
         let renderedHtml;
         if (this.apiContext && this.apiContext.status === API_STATE_READY) {
             renderedHtml = this.apiRender();

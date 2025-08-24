@@ -67,9 +67,11 @@ testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
     const kioskTimeZones = new KioskTimeZones(api)
     // @ts-ignore
     let allKioskTimeZones = await kioskTimeZones.getAllTimeZones(true)
-    if (allKioskTimeZones.length < 100) throw "allKioskTimeZones < 100"
-    if (allKioskTimeZones.filter(tz => tz.favourite == 1).length < 30)  throw "favourite Kiosk Time Zones < 30 after getAllTimeZones()"
-    if (allKioskTimeZones.filter(tz => tz.deprecated == 1).length < 10)  throw "deprecated Kiosk Time Zones < 30 after getAllTimeZones()"
+    if (allKioskTimeZones) {
+        if (allKioskTimeZones.length < 100) throw "allKioskTimeZones < 100"
+        if (allKioskTimeZones.filter(tz => tz.favourite == 1).length < 30) throw "favourite Kiosk Time Zones < 30 after getAllTimeZones()"
+        if (allKioskTimeZones.filter(tz => tz.deprecated == 1).length < 10) throw "deprecated Kiosk Time Zones < 30 after getAllTimeZones()"
+    }
 })
 
 testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {

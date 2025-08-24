@@ -8,7 +8,7 @@ interface DSDInstruction {
 
 export class DataSetDefinition {
     static CURRENT_DSD_FORMAT_VERSION = 3
-    _dsd: { [key: string]: { [key: string]: Array<string> } }
+    _dsd: { [key: string]: { [key: string]: Array<string> } } = {}
 
     _check_version(version: number) {
         if (version != DataSetDefinition.CURRENT_DSD_FORMAT_VERSION)
@@ -168,15 +168,17 @@ export class DataSetDefinition {
 
         while (nextTables.length) {
             const nextTable = nextTables.pop()
-            if (this.has_table(nextTable)) {
-                if (nextTable !== tableName) {
-                    back_joins.push(nextTable)
-                }
-                const fields = this.get_fields_with_instruction(nextTable, "join")
-                for (let field of fields) {
-                    const parameters = this.get_field_instruction_parameters(nextTable, field, "join")
-                    if ((parameters.length > 2 ? parameters[2] : "1") == "1") {
-                        nextTables.push(parameters[0])
+            if (nextTable) {
+                if (this.has_table(nextTable)) {
+                    if (nextTable !== tableName) {
+                        back_joins.push(nextTable)
+                    }
+                    const fields = this.get_fields_with_instruction(nextTable, "join")
+                    for (let field of fields) {
+                        const parameters = this.get_field_instruction_parameters(nextTable, field, "join")
+                        if (parameters && (parameters.length > 2 ? parameters[2] : "1") == "1") {
+                            nextTables.push(parameters[0])
+                        }
                     }
                 }
             }
@@ -193,9 +195,9 @@ export class DataSetDefinition {
      '
      * @return the data type as a string
      */
-    get_field_data_type(tableName: string, fieldName: string): string {
+    get_field_data_type(tableName: string, fieldName: string): string|undefined {
         const instruction = this.get_field_instruction(tableName, fieldName, "datatype")
-        return instruction.parameters[0]
+        return instruction?.parameters[0]
     }
 
 }

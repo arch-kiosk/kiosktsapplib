@@ -2,11 +2,17 @@
   "name": "kiosktsapplib",
   "description": "Library for Kiosk Typescript Apps",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.2",
   "type": "module",
-  "main": "kiosktsapplib.ts",
+  "types": "./dist/index.d.ts",
+  "main": "dist/kiosktsapplib.js",
   "exports": {
-    ".": "./kiosktsapplib.ts"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/kiosktsapplib.js"
+      }
+    }
   },
   "files": [
     "dist",
@@ -24,27 +30,30 @@
   },
   "scripts": {
     "dev": "vite --host",
-    "test": "vitest --mode development",
-    "build": "tsc && vite build --emptyOutDir"
+    "build": "vite build",
+    "dist": "tsc && vite build && npm pack --pack-destination ./dist",
+    "test": "vitest --mode development"
   },
-  "dependencies": {
-    "@lit-labs/context": "^0.5.1",
-    "dexie": "^4.0.8",
-    "lit": "^3.1.2",
-    "luxon": "^3.4.4",
-    "nanoid": "^5.0.5"
+  "peerDependencies": {
+    "@lit/context": "^1.1.6",
+    "dexie": "^4.2.0",
+    "lit": "^3.3.1",
+    "luxon": "^3.7.1",
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
+    "@types/html-minifier-terser": "^7.0.2",
     "@types/luxon": "^3.4.2",
     "fake-indexeddb": "^6.0.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.2",
     "rollup-plugin-copy": "^3.5.0",
     "sass": "^1.77.8",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4",
-    "vite": "^5.3.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vite-plugin-dts": "^4.5.4",
     "vite-plugin-html": "^3.2.2",
-    "vitest": "^2.0.4"
+    "vitest": "^3.2.4"
   }
 }
