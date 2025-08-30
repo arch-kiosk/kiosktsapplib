@@ -1,5 +1,6 @@
-import { AnyDict } from "./generaltypes";
+
 import { SimpleFunctionParser } from "./simplefunctionparser";
+import { AnyDict } from "./generaltypes";
 
 interface DSDInstruction {
     instruction: string
@@ -130,6 +131,19 @@ export class DataSetDefinition {
         }
     }
 
+    get_fields_with_datatype(tableName: string, datatype: string) {
+        if (!this.has_table(tableName)) throw `DataSetDefinition.get_fields_with_datatype: ${tableName} does not exist`
+        try {
+            datatype = datatype.toLowerCase()
+            // const searchTerm = `datatype(${datatype}})`
+            return Object.keys(this._dsd[tableName]).filter(
+                key => this._dsd[tableName][key].findIndex(instruction => instruction.toLowerCase().startsWith("datatype") && instruction.toLowerCase().includes(datatype)) > -1)
+        } catch (e) {
+            throw `DataSetDefinition.get_fields_with_datatype: ${tableName}: ${e}`
+        }
+    }
+
+
     get_field_instruction(tableName: string, fieldName: string, requestedInstruction: string): DSDInstruction | undefined {
         if (!this.has_field(tableName, fieldName)) throw `DataSetDefinition.get_field_instructions: ${tableName}.${fieldName} does not exist`
         const instructions = this._dsd[tableName][fieldName]
@@ -168,22 +182,19 @@ export class DataSetDefinition {
 
         while (nextTables.length) {
             const nextTable = nextTables.pop()
-            if (nextTable) {
-                if (this.has_table(nextTable)) {
-                    if (nextTable !== tableName) {
-                        back_joins.push(nextTable)
-                    }
-                    const fields = this.get_fields_with_instruction(nextTable, "join")
-                    for (let field of fields) {
-                        const parameters = this.get_field_instruction_parameters(nextTable, field, "join")
-                        if (parameters && (parameters.length > 2 ? parameters[2] : "1") == "1") {
-                            nextTables.push(parameters[0])
-                        }
+            if (nextTable && this.has_table(nextTable)) {
+                if (nextTable !== tableName) {
+                    back_joins.push(nextTable)
+                }
+                const fields = this.get_fields_with_instruction(nextTable, "join")
+                for (let field of fields) {
+                    const parameters = this.get_field_instruction_parameters(nextTable, field, "join")
+                    if (parameters && (parameters.length > 2 ? parameters[2] : "1") == "1") {
+                        nextTables.push(parameters[0])
                     }
                 }
             }
         }
-
         return back_joins
     }
 
@@ -195,9 +206,9 @@ export class DataSetDefinition {
      '
      * @return the data type as a string
      */
-    get_field_data_type(tableName: string, fieldName: string): string|undefined {
+    get_field_data_type(tableName: string, fieldName: string): string {
         const instruction = this.get_field_instruction(tableName, fieldName, "datatype")
-        return instruction?.parameters[0]
+        return instruction?instruction.parameters[0]:""
     }
 
 }

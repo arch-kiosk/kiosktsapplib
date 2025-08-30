@@ -1,21 +1,19 @@
 // import { html, css, LitElement } from '/node_modules/lit';
 import { html, LitElement, nothing, TemplateResult } from "lit";
 import { API_STATE_ERROR, API_STATE_READY } from "./kioskapi";
+import { property } from "lit/decorators.js";
 
 export abstract class KioskApp extends LitElement {
-    // @ts-ignore
-    kiosk_base_url = import.meta.env.VITE_KIOSK_BASE_URL;
     appErrors: any[];
     apiContext: any;
     showProgress: boolean;
+    kioskBaseUrl = ""
 
     static properties = {
-        /**
-         * The Api Context
-         */
         apiContext: { type: Object },
         appErrors: { type: Array },
         showProgress: { type: Boolean },
+        kioskBaseUrl: {type: String }
     };
 
     protected constructor() {
@@ -112,14 +110,14 @@ export abstract class KioskApp extends LitElement {
                     }
                 }
             </style>
-            <link rel="stylesheet" href="${this.kiosk_base_url}static/styles.css" />
+            <link rel="stylesheet" href="${this.kioskBaseUrl}static/styles.css" />
             ${this.renderProgress()} ${this.renderErrors()} ${renderedHtml}
         `;
     }
 
     renderNoContextYet(): TemplateResult {
         // noinspection HtmlUnknownTarget
-        return html` <link rel="stylesheet" href="${this.kiosk_base_url}static/styles.css" /> `;
+        return html` <link rel="stylesheet" href="${this.kioskBaseUrl}static/styles.css" /> `;
     }
     renderApiError(): TemplateResult | undefined {
         return undefined;

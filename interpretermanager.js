@@ -4,7 +4,6 @@ export class Interpreter {
 
     interpret(expr, quantifier="n") {
         throw "Not implemented"
-        return ""
     }
     get symbol() {
         return this._symbol
@@ -22,7 +21,7 @@ export class InterpreterManager {
         }
         this.interpreters.set(interpreter.symbol, interpreter)
     }
-    interpret(expr, quantifier="n", substCRLF="\r") {
+    interpret(expr, quantifier="n", substCRLF="\r", substUnderscore=" ") {
         if (!!!expr || typeof expr !== "string") return expr
         if (expr[0] !== this.INTERPRETER_SYMBOL) return expr
 
@@ -57,8 +56,13 @@ export class InterpreterManager {
                     expr = this.interpreters.get(symbol).interpret(toInterpret, quantifier)
                 }
         }
-        if (substCRLF !== "\r") {
-            expr = expr.replace("\n", "").replace("\r", substCRLF)
+        if (typeof expr === "string") {
+            if (substCRLF !== "\r") {
+                expr = expr.replaceAll("\n", "").replace("\r", substCRLF);
+            }
+            if (substUnderscore !== "") {
+                expr = expr.replaceAll("_", substUnderscore);
+            }
         }
         return expr
     }

@@ -1,11 +1,10 @@
 {
-  "name": "kiosktsapplib",
+  "name": "@arch-kiosk/kiosktsapplib",
   "description": "Library for Kiosk Typescript Apps",
-  "private": true,
-  "version": "0.2.2",
+  "version": "0.3",
   "type": "module",
   "types": "./dist/index.d.ts",
-  "main": "dist/kiosktsapplib.js",
+  "main": "./dist/kiosktsapplib.js",
   "exports": {
     ".": {
       "import": {
@@ -15,8 +14,7 @@
     }
   },
   "files": [
-    "dist",
-    "types"
+    "dist"
   ],
   "keywords": [],
   "author": "Lutz Klein",
@@ -34,7 +32,7 @@
     "dist": "tsc && vite build && npm pack --pack-destination ./dist",
     "test": "vitest --mode development"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@lit/context": "^1.1.6",
     "dexie": "^4.2.0",
     "lit": "^3.3.1",

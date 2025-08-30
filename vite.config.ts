@@ -18,21 +18,12 @@ export default defineConfig(({ command, mode }) => {
                 },
 
             }),
-            // copy({
-            //   targets: [ { src: '../../kioskfilemakerworkstationplugin/static/kioskfilemakerworkstation.css',
-            //     dest:'./kioskfilemakerworkstation/static'
-            //   }, {
-            //     src: '../../kioskfilemakerworkstationplugin/static/scripts',
-            //     dest:'./kioskfilemakerworkstation/static'
-            //   }],
-            //   hook: 'buildStart'
-            // }),
         ],
         esbuild:
             command == "build"
                 ? {
                       //No console.logs in the distribution
-                      // drop: ["console", "debugger"],
+                      drop: ["console", "debugger"],
                   }
                 : {},
         build: {
@@ -44,8 +35,10 @@ export default defineConfig(({ command, mode }) => {
                 formats: ["es"],
             },
             rollupOptions: {
-                // external: [/^dexie/]
-                external: [/node_modules/,]
+                // Externalize all npm packages but keep local files
+                // The !id.startsWith('\0') check is for Rollup virtual modules and plugin-generated modules.
+                external: (id) =>
+                    !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('\0') && !id.match(/^[A-Za-z]:/)
             },
         },
         server: {

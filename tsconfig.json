@@ -18,5 +18,5 @@
 //      "./types/common"
 //    ]
   },
-  "exclude": ["node_modules", "old", "../server/kiosk/kiosk/static/scripts"]
+  "exclude": ["node_modules", "old", "dist", "../server/kiosk/kiosk/static/scripts"]
 }
