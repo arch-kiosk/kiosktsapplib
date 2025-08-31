@@ -15,6 +15,8 @@ export abstract class KioskApp extends LitElement {
         showProgress: { type: Boolean },
         kioskBaseUrl: {type: String }
     };
+    protected autoRenderProgress: boolean = true;
+    protected autoRenderErrors: boolean = true;
 
     protected constructor() {
         super();
@@ -111,7 +113,7 @@ export abstract class KioskApp extends LitElement {
                 }
             </style>
             <link rel="stylesheet" href="${this.kioskBaseUrl}static/styles.css" />
-            ${this.renderProgress()} ${this.renderErrors()} ${renderedHtml}
+            ${this.autoRenderProgress?this.renderProgress():nothing} ${this.autoRenderErrors?this.renderErrors():nothing} ${renderedHtml}
         `;
     }
 

@@ -1,7 +1,7 @@
 {
   "name": "@arch-kiosk/kiosktsapplib",
   "description": "Library for Kiosk Typescript Apps",
-  "version": "0.3",
+  "version": "0.3.1",
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/kiosktsapplib.js",

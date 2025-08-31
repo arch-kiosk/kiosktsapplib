@@ -29,10 +29,16 @@
             console.log("api is ready:", api)
             runInBrowserTests(api)
         }
-        // ui = document.querySelector("#kiosk-app")
-        // ui.addEventListener("select-image", (event) => {
-        //     console.log(`Selecting image ${event.detail}`)
-        // })
+        // function apiReady(api) {
+        //     console.log("api is ready:", api)
+        //     let app = document.querySelector("#kiosk-app");
+        //     if (app) {
+        //         app.apiContext = api;
+        //         console.log(app.apiContext);
+        //     } else {
+        //         console.log("there is no app.");
+        //     }
+        // }
     </script>
     <script type="module" src="kioskdevstarter.ts"></script>
     <!--suppress JSUnresolvedLibraryURL -->
