@@ -82,8 +82,12 @@ export class KioskTimeZones {
                         version: tz.version,
                         favourite: 1 } as TimeZone
                 }) as Array<TimeZone>
-                let c = await this.db?.kioskTimeZones.bulkAdd(timeZones)
-                console.log(`Added ${c} new favourite time zones`)
+                try {
+                    let c = await this.db?.kioskTimeZones.bulkAdd(timeZones)
+                    console.log(`Added ${c} new favourite time zones`)
+                } catch (e) {
+                    console.error(`KioskTimeZones.refreshFavourites: Error when bulk adding time zones ${e}`)
+                }
                 this.hasRefreshedFavourites = true
                 return timeZones
             }
@@ -213,8 +217,12 @@ export class KioskTimeZones {
                         favourite: favourites.includes(tz.id) ? 1 : 0,
                     } as TimeZone;
                 }) as Array<TimeZone>;
-                c = await this.db.kioskTimeZones.bulkAdd(allTimeZones)
-                console.log(`added ${c} new time zones `)
+                try {
+                    c = await this.db.kioskTimeZones.bulkAdd(allTimeZones)
+                    console.log(`added ${c} new time zones `)
+                } catch (e) {
+                    console.error(`KioskTimeZones.refreshAllTimeZones: Error when bulk adding time zones ${e}`)
+                }
             }
             this.hasRefreshedAll = true
         }
