@@ -83,20 +83,21 @@ export class KioskTimeZones {
                         favourite: 1 } as TimeZone
                 }) as Array<TimeZone>
                 try {
-                    let c = await this.db?.kioskTimeZones.bulkAdd(timeZones)
-                    console.log(`Added ${c} new favourite time zones`)
+                    let c = await this.db?.kioskTimeZones.bulkPut(timeZones)
+                    console.log(`Added/updated ${c} favourite time zones`)
+                    this.hasRefreshedFavourites = true
+                    return timeZones
                 } catch (e) {
-                    console.error(`KioskTimeZones.refreshFavourites: Error when bulk adding time zones ${e}`)
+                    console.error(`KioskTimeZones.refreshFavourites: Error when bulk adding/updating time zones ${e}`)
+                    console.log("time zones are ", timeZones)
                 }
-                this.hasRefreshedFavourites = true
-                return timeZones
             }
         }
         return [] as Array<TimeZone>
     }
 
     async fetchFavouriteTimeZones() {
-        return await this.apiContext?.fetchFromApi(
+        return this.apiContext?.fetchFromApi(
             "",
             "favouritetimezones",
             {
@@ -117,7 +118,7 @@ export class KioskTimeZones {
         const urlSearchParams = new URLSearchParams();
         urlSearchParams.append("include_deprecated", "true");
         if (newerThan > 0) urlSearchParams.append("newer_than", `${newerThan}`);
-        return await this.apiContext?.fetchFromApi(
+        return this.apiContext?.fetchFromApi(
             "",
             "timezones",
             {
@@ -218,7 +219,7 @@ export class KioskTimeZones {
                     } as TimeZone;
                 }) as Array<TimeZone>;
                 try {
-                    c = await this.db.kioskTimeZones.bulkAdd(allTimeZones)
+                    c = await this.db.kioskTimeZones.bulkPut(allTimeZones)
                     console.log(`added ${c} new time zones `)
                 } catch (e) {
                     console.error(`KioskTimeZones.refreshAllTimeZones: Error when bulk adding time zones ${e}`)

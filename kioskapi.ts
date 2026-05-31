@@ -1,3 +1,5 @@
+import { AnyDict } from "./generaltypes";
+
 export const API_STATE_UNINITIALZED = 0;
 export const API_STATE_INITIALIZING = 1;
 export const API_STATE_READY = 2;
@@ -93,6 +95,7 @@ export class KioskApi {
             throw new KioskApiError("No api-token when calling fetchFromApi");
         }
         let headers = this.getHeaders(mimetype);
+        console.log("header", Object.fromEntries(headers.entries()));
         let apiURL = this.getApiUrl();
         console.log("apiURL is" + apiURL);
 
@@ -179,6 +182,7 @@ export class KioskApi {
      * @param apiVersion
      * @param urlSearchParams
      * @param mimetype
+     * @param attributes an optional dict that will be filled with width and height
      */
     async fetchBlobFromApi(
         apiRoot: string,
@@ -187,6 +191,7 @@ export class KioskApi {
         apiVersion = "v1",
         urlSearchParams: URLSearchParams | null = null,
         mimetype = "application/json",
+        attributes: AnyDict = {  }
     ) {
         if (!this.token) {
             throw new KioskApiError("No api-token when calling fetchBlobFromApi");
@@ -217,6 +222,13 @@ export class KioskApi {
             throw new FetchException(err);
         }
         if (response.ok) {
+            if (response.headers.has("X-Image-Height")) {
+                attributes["height"] = response.headers.get("X-Image-Height")
+            }
+            if (response.headers.has("X-Image-Width")) {
+                attributes["width"] = response.headers.get("X-Image-Width")
+            }
+
             return await response.blob();
         } else {
             const json_response = await response.json();

@@ -6,8 +6,16 @@ import {
     API_STATE_READY,
 } from "./kioskapi";
 
+import Cookies from "js-cookie"
+
 export class DevKioskApi extends KioskApi {
     kioskRoutes: { [key: string]: string } = {}
+    public kioskTZIndex: number
+
+    constructor(...args: ConstructorParameters<typeof KioskApi>) {
+        super(...args);
+        this.kioskTZIndex = 0
+    }
 
     getKioskRoute(routeName: string) {
         if (!this.kioskRoutes) {
@@ -42,9 +50,12 @@ export class DevKioskApi extends KioskApi {
         let headers = super.getHeaders(mimetype)
         headers.append("webapp-user-id", this.apiUser);
         headers.append("webapp-user-pwd",this.apiPwd);
+        try {
+            if (this.kioskTZIndex == 0) this.kioskTZIndex = parseInt(Cookies.get("kiosk_tz_index") ?? "0")
+        } catch {}
+        headers.append("X-Kiosk-tz-index",this.kioskTZIndex.toString());
         return headers
     }
-
 
     async initApi() {
         this.status = API_STATE_INITIALIZING;
@@ -53,6 +64,7 @@ export class DevKioskApi extends KioskApi {
         headers.append("Accept", "application/json");
         headers.append("Origin", this.apiURL);
 
+        console.log("@arch_kiosk/kiosktsapplib: initializing DevKioskApi...");
         let address = this.getApiUrl("login");
         let response;
         try {

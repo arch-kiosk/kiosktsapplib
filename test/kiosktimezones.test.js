@@ -21,4 +21,11 @@ test("test KioskTimeZones fetchFavouriteTimeZones", async () => {
     expect(jsonTimeZones.length).toBeGreaterThan(30)
 });
 
+test("test KioskTimeZones fetchFavouriteTimeZones", async () => {
+    const kioskApi = await getKioskApiforTest()
+    const kioskTimeZones = new KioskTimeZones(kioskApi)
+    const jsonTimeZones = await kioskTimeZones.fetchAllTimeZones()
+    expect(jsonTimeZones.length).toBeGreaterThan(30)
+});
+
 //The rest needs to be tested with the browser active

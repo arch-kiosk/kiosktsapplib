@@ -1,8 +1,7 @@
 import { DevKioskApi } from "./kiosktsapplib";
-import { KioskApp } from "./kiosktsapplib";
 
 window.addEventListener("load", () => {
-    console.log("kiosktsapplib: kioskdevstarter let's start...");
+    console.log("@arch_kiosk/kiosktsapplib: kioskdevstarter let's start...");
     let api = new DevKioskApi(
         undefined,
         import.meta.env.VITE_DEV_API_URL,

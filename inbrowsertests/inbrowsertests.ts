@@ -47,7 +47,7 @@ testFunctions.push(async (api:KioskApi, node: HTMLDivElement) => {
     const kioskTimeZones = new KioskTimeZones(api)
     // @ts-ignore
     const favouriteKioskTimeZones = await kioskTimeZones.refreshFavourites()
-    if (!favouriteKioskTimeZones) throw "favouriteKioskTimeZones is null: refreshing favourite time zones failed"
+    if (!favouriteKioskTimeZones || favouriteKioskTimeZones.length == 0) throw "favouriteKioskTimeZones is null: refreshing favourite time zones failed"
     if (favouriteKioskTimeZones.length < 30) throw "favouriteKioskTimeZones < 30"
     // @ts-ignore
     if (!kioskTimeZones.hasRefreshedFavourites) throw("favouriteKioskTimeZones not refreshed")
